@@ -1,11 +1,15 @@
 function [trajectory, points_3d] = lidar_gimbal(params, scan_angles, ranges)
-% LIDAR_GIMBAL  Gimbal kinematics and 3-D point-cloud generation.
+% LIDAR_GIMBAL  Gimbal kinematics and 3-D point-cloud generation (PDF §VIII-B).
 %
 %   [trajectory, points_3d] = lidar_gimbal(params, scan_angles, ranges)
 %
 %   Converts pan/tilt gimbal angles combined with fast-axis scanner
 %   deflections and measured ranges into a 3-D point cloud in a
 %   world-fixed coordinate frame.
+%
+%   Gimbal specs (PDF §VIII-B):
+%       Pan: ±180°,  Tilt: -30° to +90°
+%       Resolution: 0.01°,  Max Speed: 60°/s
 %
 %   Inputs:
 %       scan_angles  - struct with .azimuth, .elevation [deg] from scanner
@@ -52,6 +56,12 @@ trajectory.tilt = tilt;      % [deg]
 %     El_total  = gimbal_tilt + scanner_elevation
 az_total = pan  + scan_angles.azimuth(1:N);    % [deg]
 el_total = tilt + scan_angles.elevation(1:N);  % [deg]
+
+%  Quantize to gimbal resolution (0.01°, PDF §VIII-B)
+if isfield(gimbal, 'resolution') && gimbal.resolution > 0
+    az_total = round(az_total / gimbal.resolution) * gimbal.resolution;
+    el_total = round(el_total / gimbal.resolution) * gimbal.resolution;
+end
 
 az_rad = deg2rad(az_total);
 el_rad = deg2rad(el_total);

@@ -36,11 +36,12 @@ timing = params.timing;
 t_flight = 2 * true_range / c;        % round-trip [s]
 
 %% -----------------------------------------------------------------------
-%  System Timing Breakdown
+%  System Timing Breakdown (Eq. 5, PDF §X-B)
 %  -----------------------------------------------------------------------
 %  t_total = t_laser + t_flight + t_detection + t_processing
+%  PLL synchronization: 100 ps jitter between laser pulse and TDC start (PDF §X-B)
 t_laser      = params.tx.pulse_duration / 2;        % trigger-to-peak delay
-t_detection  = params.rx.tia.rise_time;              % TIA rise time
+t_detection  = params.rx.tia.rise_time;              % TIA rise time (2 ns)
 t_processing = 1 / timing.fpga_clock;               % one FPGA clock cycle
 t_total      = t_laser + t_flight + t_detection + t_processing;
 
@@ -71,17 +72,22 @@ dead_mask = [true, diff(tof) > timing.tdc_dead_time];
 tof(~dead_mask) = NaN;
 
 %% -----------------------------------------------------------------------
-%  Signal Averaging
+%  Signal Averaging  (PDF §VI-C: 16 samples)
 %  -----------------------------------------------------------------------
-%  In a real system, N pulses are averaged. Here we model the jitter
-%  reduction by dividing the jitter std by sqrt(N_avg).
+%  In a real system, N pulses are averaged. This reduces the effective
+%  jitter standard deviation by sqrt(N_avg), improving range precision.
 N_avg = timing.signal_averaging;
 tof_avg_jitter = timing.jitter / sqrt(N_avg);
 
 %% -----------------------------------------------------------------------
 %  Range Estimation
 %  -----------------------------------------------------------------------
-range_est = c * tof / 2;              % [m]
+%  Apply averaged jitter improvement to range estimate:
+%  Re-compute with reduced-jitter ToF for the 16-pulse averaged result.
+tof_averaged = t_flight + jitter / sqrt(N_avg) + linearity_err;
+tof_averaged = round(tof_averaged / tdc_res) * tdc_res;
+
+range_est = c * tof_averaged / 2;              % [m] — averaged result
 
 %% -----------------------------------------------------------------------
 %  Clamp to Measurement Range

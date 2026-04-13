@@ -3,8 +3,8 @@ function budget = lidar_power_budget(params)
 %
 %   budget = lidar_power_budget(params)
 %
-%   Uses switching regulator efficiency of 92 % and the per-subsystem
-%   voltage/current specifications from the architecture document.
+%   Uses switching regulator efficiency of 92% (PDF §IX) and the per-subsystem
+%   voltage/current specifications from the architecture document (PDF Table IV).
 %
 %   Outputs:
 %       budget - struct with per-subsystem and total power draw [W]
@@ -13,16 +13,18 @@ pwr = params.power;
 eta = pwr.regulator_efficiency;
 
 %% -----------------------------------------------------------------------
-%  Subsystem Power (load side)
+%  Subsystem Power (load side, from PDF Table IV)
 %  -----------------------------------------------------------------------
-P_laser   = pwr.laser.V   * pwr.laser.I_max;       % [W]
-P_apd     = pwr.apd.V     * pwr.apd.I_max;         % [W]
+P_laser   = pwr.laser.V   * pwr.laser.I_max;       % [W]  5V × 10A = 50W
+P_apd     = pwr.apd.V     * pwr.apd.I_max;         % [W]  200V × 50µA = 0.01W
 
-% FPGA has dual rails — sum both
-P_fpga    = sum(pwr.fpga.V) * pwr.fpga.I_max;      % [W]  (simplified)
+% FPGA has dual rails (PDF Table IV: 1.0V/2.5V × 3A)
+% Interpretation: 3A is the total budget across both rails.
+% P_fpga = (1.0 + 2.5) × 3 = 10.5 W
+P_fpga    = sum(pwr.fpga.V) * pwr.fpga.I_max;      % [W]
 
-P_gimbal  = pwr.gimbal.V  * pwr.gimbal.I_max;      % [W]
-P_cooling = pwr.cooling.V * pwr.cooling.I_max;      % [W]
+P_gimbal  = pwr.gimbal.V  * pwr.gimbal.I_max;      % [W]  24V × 2A = 48W
+P_cooling = pwr.cooling.V * pwr.cooling.I_max;      % [W]  12V × 2A = 24W
 
 P_load_total = P_laser + P_apd + P_fpga + P_gimbal + P_cooling;
 

@@ -80,7 +80,7 @@ draw_arrow(ax1, 83, y_tx, 87, y_tx, col_arrow);
 % F-theta Lens
 draw_block(ax1, 87, y_tx, 16, 12, col_optics, ...
     {'F-THETA', 'LENS', '', 'f = 100 mm', ...
-     'Field: 200×200 mm', 'Dist: 10.1%'}, 'w');
+     'Field: 200×200 mm', 'Dist: <0.1%'}, 'w');
 
 % Arrow to target
 draw_arrow(ax1, 103, y_tx, 110, y_tx, col_arrow);
@@ -179,8 +179,9 @@ draw_block(ax1, 75, y_dg, 18, 12, [0.2 0.2 0.2], ...
 
 % =========== GIMBAL (right side, bottom) ===========
 draw_block(ax1, 115, y_dg, 16, 12, col_mech, ...
-    {'GIMBAL', 'SYSTEM', '', 'Pan: \pm180°', ...
-     'Tilt: -30°..+90°', 'Speed: 60°/s'}, 'w');
+    {'GIMBAL', 'SYSTEM', '', 'Pan: \pm180\circ', ...
+     'Tilt: -30\circ..+90\circ', 'Res: 0.01\circ', ...
+     'Speed: 60\circ/s'}, 'w');
 
 % Arrow from gimbal to scanner
 draw_dashed_arrow(ax1, 123, y_dg+6, 123, y_tx-20, col_mech);
@@ -401,7 +402,7 @@ text(60, 57, 'Power Distribution — Switching Regulators (\eta = 92%)', ...
 
 % Main supply
 draw_block(ax3, 45, 48, 30, 6, [0.3 0.3 0.3], ...
-    {'MAIN POWER SUPPLY', 'Total: ~125 W (supply side)'}, 'w');
+    {'MAIN POWER SUPPLY', 'Total: ~144 W (supply side, η=92%)'}, 'w');
 
 % Branches
 subsystems = {

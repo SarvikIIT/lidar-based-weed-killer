@@ -44,8 +44,8 @@ tof           = 2*R_target/c;                            % round-trip time
 G_channel = BS_transmit * eta_optics_tx * (rho/pi) * (A_rx/R_target^2) ...
             * eta_atm^2 * eta_optics_rx;
 
-% TIA gain (select from spec range 10kΩ–1MΩ)
-Zt = 10e3;   % 10 kΩ — low end, appropriate for short range
+% TIA gain (from params, selectable 10kΩ–1MΩ per PDF §VI-A)
+Zt = params.rx.tia.gain;   % [Ohm] default 100 kΩ
 
 % APD noise parameters (all internal to APD)
 Id         = params.rx.apd.dark_current;       % 1 nA
@@ -67,8 +67,11 @@ fprintf('Building Simulink model from architecture spec...\n');
 
 new_system(modelName);
 open_system(modelName);
+% Use ode1 (Euler) fixed-step solver — required for continuous Transfer Fcn
+% block in Component 5 (TIA bandwidth filter). FixedStepDiscrete cannot
+% simulate continuous dynamics.
 set_param(modelName, ...
-    'SolverType','Fixed-step', 'Solver','FixedStepDiscrete', ...
+    'SolverType','Fixed-step', 'Solver','ode1', ...
     'FixedStep','5e-10', 'StopTime','4e-5');
 
 s = 'simulink';
@@ -217,7 +220,7 @@ anno(modelName,[50,390], ...
 anno(modelName,[180,460],'APD internal: shot noise (signal-dependent) + dark current (1nA DC + noise)');
 
 %% =====================================================================
-%  COMPONENT 5: TIA  (Zt=10kΩ–1MΩ, BW=200MHz, in=2pA/√Hz, tr=2ns)
+%  COMPONENT 5: TIA  (Zt=100kΩ default, 10kΩ–1MΩ range, BW=200MHz, in=2pA/√Hz, tr=2ns)
 %  =====================================================================
 %  Converts APD output current to voltage.
 %  Bandwidth-limited by single-pole at 200 MHz.
@@ -241,10 +244,10 @@ add_block([s,'/Continuous/Transfer Fcn'], ...
     'Denominator',sprintf('[%.6e 1]', tau_tia));
 add_line(modelName,'TIA_Zt/1','TIA_Bandwidth/1','autorouting','smart');
 
-% TIA internal noise: in × sqrt(BW) × Zt → voltage noise
-% Thermal noise from Zt: sqrt(4kTBW/Zt) × Zt → voltage noise
-V_tia_noise_rms   = i_tia_n * sqrt(BW) * Zt;                % TIA input noise as voltage
-V_thermal_rms     = sqrt(4*kB*T*BW/Zt) * Zt;                % thermal noise as voltage
+% TIA internal noise (must use TIA bandwidth = 200 MHz, not APD bandwidth)
+BW_tia = params.rx.tia.bandwidth;                             % 200 MHz
+V_tia_noise_rms   = i_tia_n * sqrt(BW_tia) * Zt;             % TIA input noise as voltage
+V_thermal_rms     = sqrt(4*kB*T*BW_tia/Zt) * Zt;             % thermal noise as voltage
 V_total_noise_rms = sqrt(V_tia_noise_rms^2 + V_thermal_rms^2); % combined TIA noise
 
 add_block([s,'/Sources/Random Number'], ...
@@ -274,12 +277,22 @@ anno(modelName,[50,700], ...
 %% =====================================================================
 %  COMPONENT 6: TDC  (50ps res, 500MSPS, dead=10ns, jitter=100ps)
 %  =====================================================================
-%  Threshold comparator detects return pulse.
-%  TDC measures time with 50 ps quantisation.
-%  Timing jitter (100 ps) from laser-to-TDC synchronisation.
+%  Architecture:  The TDC measures the TIME at which the return pulse
+%  crosses the detection threshold (not the binary 0/1 output).
+%
+%  Signal chain:
+%    V_tia → Comparator → triggers time-latch → TDC quantises time
+%    → adds jitter → FPGA computes R = c*t/2
+%
+%  Implementation:
+%    - The comparator detects threshold crossing (output = 0 or 1)
+%    - A "time latch" block (Product of comparator × Clock) captures
+%      the simulation time when the pulse arrives.
+%    - This time is then quantised to 50 ps bins and jitter is added.
 
 V_th = 0.05;  % 50 mV detection threshold
 
+% Threshold comparator: outputs 1 when V_tia > V_th
 add_block([s,'/Discontinuities/Relay'], ...
     [modelName,'/TDC_Comparator'], ...
     'Position',[130,870,250,900], ...
@@ -288,46 +301,61 @@ add_block([s,'/Discontinuities/Relay'], ...
     'OnOutputValue','1','OffOutputValue','0');
 add_line(modelName,'TIA_Output/1','TDC_Comparator/1','autorouting','smart');
 
-% TDC quantiser (50 ps resolution)
-add_block([s,'/Discontinuities/Quantizer'], ...
-    [modelName,'/TDC_Quantizer'], ...
-    'Position',[330,870,440,900], ...
-    'QuantizationInterval', sprintf('%.2e', params.timing.tdc_resolution));
-add_line(modelName,'TDC_Comparator/1','TDC_Quantizer/1','autorouting','smart');
-
-% Timing jitter (100 ps, Gaussian — from laser/TDC sync)
-add_block([s,'/Sources/Random Number'], ...
-    [modelName,'/Jitter_100ps'], 'Position',[330,930,370,960], ...
-    'SampleTime','5e-10','Variance',sprintf('%.4e', params.timing.jitter^2));
-add_block([s,'/Math Operations/Add'], ...
-    [modelName,'/TDC_Output'], 'Position',[510,870,550,910], 'Inputs','++');
-add_line(modelName,'TDC_Quantizer/1','TDC_Output/1','autorouting','smart');
-add_line(modelName,'Jitter_100ps/1', 'TDC_Output/2','autorouting','smart');
-
 % Scope: digital comparator output
 add_block([s,'/Sinks/Scope'], [modelName,'/Scope_TDC'], ...
     'Position',[330,820,370,855]);
 add_line(modelName,'TDC_Comparator/1','Scope_TDC/1','autorouting','smart');
 
+% Time-latch: capture simulation time at threshold crossing.
+% Output = comparator(t) × Clock(t).  When comparator = 0, output = 0.
+% When comparator = 1, output = current simulation time.
+% This gives us the time-of-arrival of the return pulse.
+add_block([s,'/Sources/Clock'], [modelName,'/TDC_Clock'], ...
+    'Position',[130,930,170,960]);
+add_block([s,'/Math Operations/Product'], ...
+    [modelName,'/TDC_TimeLatch'], 'Position',[300,880,340,920]);
+add_line(modelName,'TDC_Comparator/1','TDC_TimeLatch/1','autorouting','smart');
+add_line(modelName,'TDC_Clock/1','TDC_TimeLatch/2','autorouting','smart');
+
+% TDC quantiser applied to TIME (not to binary output).
+% Quantisation interval = 50 ps — this is the TDC's resolution.
+add_block([s,'/Discontinuities/Quantizer'], ...
+    [modelName,'/TDC_Quantizer'], ...
+    'Position',[400,880,500,920], ...
+    'QuantizationInterval', sprintf('%.2e', params.timing.tdc_resolution));
+add_line(modelName,'TDC_TimeLatch/1','TDC_Quantizer/1','autorouting','smart');
+
+% Timing jitter (100 ps RMS, Gaussian — from PLL laser/TDC sync, PDF §X-B)
+% Added as a random time error to the quantised ToF measurement.
+add_block([s,'/Sources/Random Number'], ...
+    [modelName,'/Jitter_100ps'], 'Position',[400,940,440,970], ...
+    'SampleTime','5e-10','Variance',sprintf('%.4e', params.timing.jitter^2));
+add_block([s,'/Math Operations/Add'], ...
+    [modelName,'/TDC_Output'], 'Position',[560,880,600,930], 'Inputs','++');
+add_line(modelName,'TDC_Quantizer/1','TDC_Output/1','autorouting','smart');
+add_line(modelName,'Jitter_100ps/1', 'TDC_Output/2','autorouting','smart');
+
 anno(modelName,[50,850], ...
-    sprintf('[6] TDC: Res=50ps, 500MSPS, DeadTime=10ns, Jitter=100ps, Vth=%.0fmV', V_th*1e3));
+    sprintf('[6] TDC: Comparator(Vth=%.0fmV) → Time-Latch → Quantiser(50ps) + Jitter(100ps)', V_th*1e3));
 
 %% =====================================================================
 %  COMPONENT 7: FPGA  (450MHz clock, 16-sample averaging)
 %  =====================================================================
 %  Range calculation: R = c × ToF / 2
+%  The TDC_Output is a quantised + jittered TIME value (in seconds).
+%  The FPGA multiplies by c/2 to convert to range in metres.
 
 add_block([s,'/Math Operations/Gain'], ...
     [modelName,'/FPGA_Range_Calc'], ...
-    'Position',[630,870,760,900], ...
+    'Position',[680,880,800,920], ...
     'Gain', sprintf('%.6f', c/2));
 add_line(modelName,'TDC_Output/1','FPGA_Range_Calc/1','autorouting','smart');
 
 add_block([s,'/Sinks/Display'], [modelName,'/Range_Display_m'], ...
-    'Position',[830,870,940,900]);
+    'Position',[870,880,980,920]);
 add_line(modelName,'FPGA_Range_Calc/1','Range_Display_m/1','autorouting','smart');
 
-anno(modelName,[50,970], ...
+anno(modelName,[50,980], ...
     sprintf('[7] FPGA: 450MHz clk, 16-sample avg → R = c×ToF/2'));
 
 %% =====================================================================

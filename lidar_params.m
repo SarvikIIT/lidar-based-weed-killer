@@ -33,23 +33,27 @@ params.tx = tx;
 %% -----------------------------------------------------------------------
 %  2. OPTICAL SCANNING & TRANSMISSION
 %  -----------------------------------------------------------------------
-%  --- Polygon Mirror ---
+%  --- Polygon Mirror (PDF §III-C) ---
 scan.polygon.facets          = 8;
 scan.polygon.rpm             = 10000;          % [RPM]
 scan.polygon.mech_angle      = 60;             % [deg]  mechanical scan angle
-scan.polygon.opt_angle        = 120;            % [deg]  optical scan angle
+scan.polygon.opt_angle       = 120;            % [deg]  optical scan angle (2x mech)
 scan.polygon.angular_vel     = scan.polygon.rpm * 360 / 60; % [deg/s]
+scan.polygon.surface_flatness = 632.8e-9 / 10; % [m]  λ/10 at 632.8 nm (PDF §III-C)
 
-%  --- Galvanometer Scanner ---
+%  --- Galvanometer Scanner (PDF §III-C) ---
 scan.galvo.freq              = 100;            % [Hz]
-scan.galvo.ang_res           = 0.001;          % [deg]
-scan.galvo.settling          = 1e-3;           % [s]
-scan.galvo.repeatability     = 0.005;          % [deg]  ±
+scan.galvo.ang_res           = 0.001;          % [deg]  angular resolution
+scan.galvo.settling          = 1e-3;           % [s]   1 ms settling time
+scan.galvo.repeatability     = 0.005;          % [deg]  ± repeatability
+scan.galvo.scan_range        = 120;            % [deg]  total optical scan range
 
-%  --- Transmission Optics ---
-scan.beam_splitter_ratio     = 0.5;            % 50:50 at 905 nm
+%  --- Transmission Optics (PDF §IV) ---
+scan.beam_splitter_ratio     = 0.5;            % 50:50 at 905 nm (Eq. 2: R=((n1-n2)/(n1+n2))^2)
 scan.ftheta_focal            = 100e-3;         % [m]   F-theta lens focal length
 scan.ftheta_field            = [200e-3, 200e-3]; % [m]  scan field (X × Y)
+scan.ftheta_distortion_max   = 0.001;          % <0.1% distortion (PDF §IV-B)
+scan.ftheta_wavefront_error  = 0.1;            % ≤0.1λ wavefront error (PDF §IV-B)
 
 %  --- Default scanning method ---
 scan.method = 'polygon';   % 'polygon' | 'galvo'
@@ -95,13 +99,15 @@ timing.jitter               = 100e-12;         % [s]   100 ps timing jitter
 params.timing = timing;
 
 %% -----------------------------------------------------------------------
-%  5. GIMBAL KINEMATICS & SYSTEM BOUNDARIES
+%  5. GIMBAL KINEMATICS & SYSTEM BOUNDARIES (PDF §VIII-B, §XI-B)
 %  -----------------------------------------------------------------------
-gimbal.pan_range            = [-180, 180];      % [deg]
-gimbal.tilt_range           = [-30, 90];        % [deg]
-gimbal.max_speed            = 60;               % [deg/s]
-gimbal.max_range            = 50;               % [m]   max target range
-gimbal.range_resolution     = 0.02;             % [m]   2 cm
+gimbal.pan_range            = [-180, 180];      % [deg]  ±180° (PDF §VIII-B)
+gimbal.tilt_range           = [-30, 90];        % [deg]  -30° to +90° (PDF §VIII-B)
+gimbal.resolution           = 0.01;             % [deg]  0.01° mechanical resolution (PDF §VIII-B)
+gimbal.max_speed            = 60;               % [deg/s] (PDF §VIII-B)
+gimbal.max_range            = 50;               % [m]   max target range (PDF §XI-B)
+gimbal.range_resolution     = 0.02;             % [m]   2 cm range resolution (PDF §XI-B)
+gimbal.angular_resolution   = 0.1;              % [deg]  0.1° angular resolution (PDF §XI-B)
 params.gimbal = gimbal;
 
 %% -----------------------------------------------------------------------
@@ -112,21 +118,22 @@ ml.max_depth                = 20;
 ml.features_per_split       = 'sqrt';          % sqrt(n_features)
 ml.training_samples         = 50000;
 ml.target_accuracy          = 0.947;           % 94.7 %
-ml.feature_names            = {'height_above_ground', ...
-                               'point_density', ...
-                               'spatial_variance', ...
-                               'reflectivity', ...
-                               'geometric_moments'};
+ml.feature_names            = {'height_above_ground', ...     % PDF §VII-B
+                               'point_density', ...           % implementation extension
+                               'spatial_distribution_var', ...% PDF §VII-B
+                               'reflectivity_intensity', ...  % PDF §VII-B, Eq. 4
+                               'geometric_moments'};          % PDF §VII-B
 params.ml = ml;
 
 %% -----------------------------------------------------------------------
 %  7. ERROR INJECTION & TOLERANCES
 %  -----------------------------------------------------------------------
-errors.bs_polarization_dep  = 0.15;            % 15 % dependence
-errors.ftheta_distortion    = 0.101;           % 10.1 %
-errors.filter_angle_tol     = 5;               % [deg] ±
-errors.filter_temp_stab     = 0.01e-9;         % [m/°C]  0.01 nm/°C
-errors.tdc_linearity        = 0.5;             % [LSB]
+errors.bs_polarization_dep  = 0.05;            % <5 % polarisation dependence (PDF §IV-A)
+errors.ftheta_distortion    = 0.001;           % <0.1 % distortion (PDF §IV-B)
+errors.filter_angle_tol     = 5;               % [deg] ±5° (PDF §V-B)
+errors.filter_temp_stab     = 0.01e-9;         % [m/°C]  0.01 nm/°C (PDF §V-B)
+errors.filter_pol_dep       = 0.05;            % <5 % filter polarization dep. (PDF §V-B)
+errors.tdc_linearity        = 0.5;             % [LSB]  ±0.5 LSB (PDF Table III)
 params.errors = errors;
 
 %% -----------------------------------------------------------------------
@@ -150,11 +157,31 @@ sim_ctrl.q               = 1.602176634e-19;    % [C]   electron charge
 sim_ctrl.n_targets        = 200;               % number of scene targets
 sim_ctrl.target_range     = [1, 50];           % [m]   range bracket
 sim_ctrl.target_reflectivity = 0.3;            % mean Lambertian reflectivity
-sim_ctrl.atm_extinction   = 0.1;              % [1/km] atmospheric extinction
-sim_ctrl.atm_transmission = @(R) exp(-sim_ctrl.atm_extinction * R / 1e3);
+sim_ctrl.atm_extinction   = 0.1;              % [1/km] atmospheric extinction coeff
+sim_ctrl.atm_transmission = @(R) exp(-sim_ctrl.atm_extinction * R / 1e3);  % one-way; R in [m]
 sim_ctrl.dt               = timing.tdc_resolution; % simulation time step
 sim_ctrl.N_mc             = 500;               % Monte-Carlo iterations
 sim_ctrl.rng_seed         = 42;
 params.sim = sim_ctrl;
+
+%% -----------------------------------------------------------------------
+%  10. ENVIRONMENTAL ENCLOSURE  (PDF §VIII-A)
+%  -----------------------------------------------------------------------
+enclosure.ip_rating      = 'IP67';
+enclosure.temp_control   = 'Active Peltier (TEC) cooling';
+enclosure.vibration      = 'Damped mounting system';
+enclosure.dust           = 'Positive pressure with HEPA filter';
+params.enclosure = enclosure;
+
+%% -----------------------------------------------------------------------
+%  11. TABLE V PERFORMANCE TARGETS  (PDF §XI-A)
+%  -----------------------------------------------------------------------
+%  condition:  string label
+%  precision, recall, f_score:  values from PDF Table V
+perf_targets.conditions  = {'Clear Day', 'Overcast', 'Light Rain', 'Dawn/Dusk'};
+perf_targets.precision   = [0.952, 0.941, 0.911, 0.928];
+perf_targets.recall      = [0.948, 0.937, 0.905, 0.921];
+perf_targets.f_score     = [0.950, 0.939, 0.908, 0.924];
+params.perf_targets = perf_targets;
 
 end

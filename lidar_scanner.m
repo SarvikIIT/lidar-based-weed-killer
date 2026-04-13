@@ -17,9 +17,9 @@ method = scan.method;
 switch lower(method)
     
     case 'polygon'
-        %% Rotating Polygon Mirror
-        %  Each facet subtends 360 / N_facets degrees mechanically.
-        %  The optical scan angle per facet = 2 × mechanical angle per facet.
+        %% Rotating Polygon Mirror (PDF §III-C)
+        %  Each facet subtends 360/N_facets degrees mechanically.
+        %  Optical scan angle per facet = 2 × mechanical angle per facet.
         n_facets     = scan.polygon.facets;
         omega_mech   = scan.polygon.rpm * 2 * pi / 60;   % [rad/s]
         
@@ -38,25 +38,28 @@ switch lower(method)
         % Elevation is fixed per scan line; slow axis from gimbal
         elevation = zeros(size(t_sim));
         
-        scan_info.type     = 'polygon';
-        scan_info.facets   = n_facets;
+        scan_info.type      = 'polygon';
+        scan_info.facets    = n_facets;
         scan_info.line_rate = scan.polygon.rpm / 60 * n_facets; % [lines/s]
         
     case 'galvo'
-        %% Galvanometer Scanner
+        %% Galvanometer Scanner (PDF §III-C)
         %  Sinusoidal scan at the specified frequency.
-        f_scan = scan.galvo.freq;   % [Hz]
-        half_range = scan.polygon.opt_angle / 2;  % reuse optical range
+        %  Angular resolution: 0.001° (PDF §III-C)
+        %  Repeatability: ±0.005° (PDF §III-C)
+        %  Settling time: 1 ms (PDF §III-C)
+        f_scan    = scan.galvo.freq;             % [Hz]  100 Hz scan freq
+        half_range = scan.galvo.scan_range / 2;  % [deg] galvo's own scan range
         
         azimuth   = half_range * sin(2 * pi * f_scan * t_sim);
         elevation = zeros(size(t_sim));
         
-        % Add repeatability error
+        % Add repeatability error (±0.005°, PDF §III-C)
         azimuth   = azimuth + scan.galvo.repeatability * randn(size(t_sim));
         
-        scan_info.type     = 'galvo';
-        scan_info.freq     = f_scan;
-        scan_info.line_rate = 2 * f_scan;       % bi-directional
+        scan_info.type      = 'galvo';
+        scan_info.freq      = f_scan;
+        scan_info.line_rate  = 2 * f_scan;       % bi-directional
         
     otherwise
         error('lidar_scanner:badMethod', ...

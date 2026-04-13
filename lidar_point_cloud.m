@@ -5,20 +5,20 @@ function [pc_clean, features, labels, pipeline_info] = lidar_point_cloud( ...
 %   [pc_clean, features, labels, pipeline_info] = ...
 %       lidar_point_cloud(params, points_3d, reflectivity)
 %
-%   Pipeline stages (per architecture):
-%       1. Remove Noise           (statistical outlier removal)
-%       2. Ground Segmentation    (RANSAC plane fitting)
-%       3. Object Isolation       (Filtered − Ground)
-%       4. Feature Extraction     (5 features)
-%       5. Classification         (Random Forest)
-%       6. Combine with Ground
+%   Pipeline stages (per PDF §VII-A pseudocode):
+%       P_filtered    ← RemoveNoise(P_raw)
+%       P_ground      ← GroundSegmentation(P_filtered)
+%       P_objects     ← P_filtered − P_ground
+%       F             ← ExtractFeatures(P_objects)
+%       C             ← Classify(F)
+%       P_classified  ← Combine(P_ground, C)
 %
-%   Extracted features:
-%       1. Height above ground
-%       2. Point density
-%       3. Spatial distribution variance
-%       4. Reflectivity intensity
-%       5. Geometric moments (2nd central moment of local patch)
+%   Extracted features (PDF §VII-B + implementation extension):
+%       1. Height above ground          (PDF §VII-B)
+%       2. Point density                (implementation extension)
+%       3. Spatial distribution variance (PDF §VII-B)
+%       4. Reflectivity intensity        (PDF §VII-B, Eq. 4)
+%       5. Geometric moments             (PDF §VII-B)
 %
 %   Inputs:
 %       points_3d     - [N x 3] point cloud (X, Y, Z)
@@ -44,6 +44,12 @@ reflectivity = reflectivity(:);
 k_nn = 10;
 
 if N > k_nn
+    % Warn if point cloud is very large (O(N²) memory)
+    if N > 5000
+        warning('lidar_point_cloud:largeN', ...
+            'Point cloud has %d points — distance matrix requires %.0f MB.', ...
+            N, N^2 * 8 / 1e6);
+    end
     % Simple brute-force kNN (fine for demonstration)
     D = compute_dist_matrix(points_3d);    % [N x N] distance matrix
     D_sorted = sort(D, 2, 'ascend');         % column 1 = self (0)
@@ -167,17 +173,15 @@ if M_obj > 0
 end
 
 %% =======================================================================
-%  STAGE 5: Classification (Random Forest — Synthetic)
+%  STAGE 5: Classification
 %  =======================================================================
-%  In a real MATLAB deployment you would use TreeBagger / fitcensemble.
-%  Here we create a synthetic classifier that separates crop vs. weed
-%  based on the extracted features, matching the specified 94.7 % accuracy.
+%  Classification is now handled by lidar_classifier.m (PDF §VII-C)
+%  which implements a proper Random Forest with training data generation,
+%  TreeBagger (when available), and Table V environmental evaluation.
+%  This module only does feature extraction; labels come from the
+%  classifier called in run_lidar_simulation.m.
 
-if M_obj > 0
-    labels = synthetic_random_forest(features, params.ml);
-else
-    labels = [];
-end
+labels = [];   % placeholder — filled by lidar_classifier.m
 
 %% =======================================================================
 %  STAGE 6: Combine with Ground (output)
@@ -191,44 +195,6 @@ pipeline_info.pc_objects = pc_objects;
 
 end
 
-%% =======================================================================
-%  LOCAL FUNCTION: Synthetic Random Forest
-%  =======================================================================
-function labels = synthetic_random_forest(features, ml_params)
-% Mimics an RF classifier with the specified accuracy.
-%
-%   Decision rule (heuristic for simulation):
-%       - Weeds tend to be shorter (height < threshold), higher density,
-%         higher reflectivity variance, different geometric moments.
-%
-%   We add controlled noise to achieve ~94.7% accuracy.
-
-    n = size(features, 1);
-    
-    % Normalise features to [0, 1]
-    f_min = min(features, [], 1);
-    f_max = max(features, [], 1);
-    f_range = f_max - f_min;
-    f_range(f_range == 0) = 1;   % avoid divide-by-zero
-    f_norm = (features - f_min) ./ f_range;
-    
-    % Simple linear discriminant (mimicking RF boundary)
-    %   score = w' * features + bias
-    %   Positive → crop (1),  Negative → weed (2)
-    w = [0.3; -0.2; -0.15; 0.25; -0.1];
-    score = f_norm * w + 0.1;
-    
-    %  Inject classification noise to match target accuracy
-    target_acc = ml_params.target_accuracy;
-    error_rate = 1 - target_acc;
-    flip_mask  = rand(n, 1) < error_rate;
-    
-    labels = ones(n, 1);              % default: crop
-    labels(score < 0) = 2;            % weed
-    
-    % Flip selected labels to inject error
-    labels(flip_mask) = 3 - labels(flip_mask);   % 1↔2
-end
 
 %% =======================================================================
 %  LOCAL FUNCTION: Distance matrix (pdist2 fallback)
