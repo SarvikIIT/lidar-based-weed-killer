@@ -68,6 +68,7 @@ rx.telescope.focal          = 150e-3;          % [m]   effective focal length
 rx.telescope.fov            = 2e-3;            % [rad] field of view
 rx.telescope.filter_cw      = 905e-9;          % [m]   bandpass centre
 rx.telescope.filter_fwhm    = 10e-9;           % [m]   filter FWHM
+rx.telescope.filter_rejection = 6;             % [OD]  >OD6 filter rejection (PDF §V-B)
 
 %  --- Avalanche Photodiode ---
 rx.apd.active_diameter      = 200e-6;          % [m]
@@ -119,7 +120,7 @@ ml.features_per_split       = 'sqrt';          % sqrt(n_features)
 ml.training_samples         = 50000;
 ml.target_accuracy          = 0.947;           % 94.7 %
 ml.feature_names            = {'height_above_ground', ...     % PDF §VII-B
-                               'point_density', ...           % implementation extension
+                               'point_density', ...           % PDF §VII-B
                                'spatial_distribution_var', ...% PDF §VII-B
                                'reflectivity_intensity', ...  % PDF §VII-B, Eq. 4
                                'geometric_moments'};          % PDF §VII-B

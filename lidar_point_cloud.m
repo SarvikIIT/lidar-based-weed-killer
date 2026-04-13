@@ -121,6 +121,14 @@ pipeline_info.n_ground  = sum(ground_mask);
 pipeline_info.n_objects = sum(~ground_mask);
 pipeline_info.ground_plane = [n_vec, d_plane];
 
+% Track which rows of the original input (points_3d / reflectivity) each
+% object point came from.  Two-step: noise filter then ground filter.
+%   Step 1: inlier_mask maps filtered rows → original rows
+%   Step 2: ~ground_mask maps object rows → filtered rows
+inlier_idx              = find(inlier_mask);          % in original coords
+obj_in_filtered         = find(~ground_mask);         % in filtered coords
+pipeline_info.obj_input_idx = inlier_idx(obj_in_filtered);  % in original coords
+
 %% =======================================================================
 %  STAGE 3: Object Isolation  (already done above)
 %  =======================================================================
@@ -129,47 +137,65 @@ M_obj = size(pc_objects, 1);
 %% =======================================================================
 %  STAGE 4: Feature Extraction
 %  =======================================================================
-%  5 features per-point (using local neighbourhood)
+%  5 features per-point (PDF §VII-B), extracted from local neighbourhood.
+%  A data-adaptive radius is used so features are meaningful regardless
+%  of overall point-cloud density (e.g., sparse drone scans).
 
 features = zeros(M_obj, 5);
 
 if M_obj > 0
-    % Height above ground
-    height_above_ground = abs(pc_objects * n_vec' + d_plane);
-    features(:, 1) = height_above_ground;
-    
-    %  Point density (number of neighbours within radius r)
-    r_density = 0.1;  % [m]
+    % --- Feature 1: Height above the fitted ground plane ---
+    features(:, 1) = abs(pc_objects * n_vec' + d_plane);
+
     if M_obj > 1
-        D_obj = compute_dist_matrix(pc_objects);
-        features(:, 2) = sum(D_obj < r_density, 2) - 1;  % exclude self
-    end
-    
-    %  Spatial distribution variance (trace of local covariance)
-    k_local = min(10, M_obj - 1);
-    for i = 1:M_obj
-        if M_obj > 1
-            [~, nn_idx] = sort(D_obj(i, :), 'ascend');
-            nn_idx = nn_idx(2:min(k_local+1, end));
-            local_pts = pc_objects(nn_idx, :);
-            features(i, 3) = trace(cov(local_pts));
-        end
-    end
-    
-    %  Reflectivity intensity (normalised)
-    features(:, 4) = refl_obj;
-    
-    %  Geometric moments (2nd central moment ≈ inertia)
-    for i = 1:M_obj
-        if M_obj > 1
-            [~, nn_idx] = sort(D_obj(i, :), 'ascend');
-            nn_idx = nn_idx(2:min(k_local+1, end));
-            local_pts = pc_objects(nn_idx, :);
-            centroid  = mean(local_pts, 1);
-            diffs     = local_pts - centroid;
+        % Pre-compute full pairwise distance matrix (used for all k-NN features)
+        D_obj = compute_dist_matrix(pc_objects);       % [M_obj x M_obj]
+
+        % Sort each row once; re-use for all neighbourhood lookups
+        D_sorted = sort(D_obj, 2, 'ascend');           % col 1 = self (0)
+
+        k_local = min(10, M_obj - 1);                 % neighbours to use
+
+        % Data-adaptive density radius: 25th percentile of each point's
+        % k-NN distance, so density is non-trivial even for sparse clouds.
+        r_density = max(median(D_sorted(:, min(k_local+1, end))), 1e-6);
+
+        % --- Feature 2: Point density (neighbours within r_density) ---
+        features(:, 2) = max(sum(D_obj < r_density, 2) - 1, 0);
+
+        % --- Features 3 & 5: spatial variance and geometric moment ---
+        for i = 1:M_obj
+            nn_cols  = 2 : min(k_local + 1, M_obj);   % skip self (col 1)
+            [~, ord] = sort(D_obj(i, :), 'ascend');
+            nn_idx   = ord(nn_cols);
+
+            local_pts = pc_objects(nn_idx, :);         % [k x 3]
+
+            if size(local_pts, 1) >= 2
+                % Feature 3: trace of local covariance (spread)
+                features(i, 3) = trace(cov(local_pts));
+            else
+                % Single neighbour: use squared distance as variance proxy
+                features(i, 3) = D_sorted(i, 2)^2;
+            end
+
+            % Feature 5: mean squared distance to local centroid
+            centroid       = mean(local_pts, 1);
+            diffs          = local_pts - centroid;
             features(i, 5) = mean(sum(diffs.^2, 2));
         end
+    else
+        % Only one object point: all neighbourhood features are 0
+        features(1, 2) = 0;
+        features(1, 3) = 0;
+        features(1, 5) = 0;
     end
+
+    % --- Feature 4: Reflectivity intensity (normalised, from channel) ---
+    features(:, 4) = refl_obj(:);
+
+    % Clamp all features to non-negative (physical constraint)
+    features = max(features, 0);
 end
 
 %% =======================================================================

@@ -92,9 +92,15 @@ end
 %% -----------------------------------------------------------------------
 %  Normalised Reflectivity Intensity (Eq. 4, PDF §VII-B)
 %  -----------------------------------------------------------------------
-%  I_norm = I_measured * R^2 / (P_laser * eta_atm)
-%  Uses P_received as proxy for I_measured (proportional).
-I_normalised = P_received .* R.^2 ./ (tx.peak_power .* eta_atm);
+%  Correct inversion of the LiDAR equation to recover target reflectivity:
+%
+%    P_r = P_t * eta_t * eta_r * eta_atm^2 * rho * A_rx / (pi * R^2)
+%    =>  rho = P_r * pi * R^2 / (P_t * eta_t * eta_r * eta_atm^2 * A_rx)
+%
+%  I_normalised therefore carries units of [dimensionless] reflectivity (0-1),
+%  which matches the feature range expected by the Random Forest classifier.
+I_normalised = (P_received .* pi .* R.^2) ./ ...
+               (tx.peak_power .* eta_t .* eta_r .* (eta_atm.^2) .* A_rx);
 
 %% -----------------------------------------------------------------------
 %  Required Telescope Aperture (Eq. 3, PDF §V-C — design verification)
