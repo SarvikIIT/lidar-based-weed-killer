@@ -36,8 +36,12 @@ text(80, 94, 'Full Electro-Optical Signal Chain', ...
     'FontSize', 11, 'HorizontalAlignment', 'center', ...
     'Color', [0.4 0.4 0.4], 'FontAngle', 'italic');
 
-% =========== TRANSMITTER CHAIN (top row, left) ===========
+% =========== COORDINATES & LAYOUT ===========
 y_tx = 75;
+y_rx = 38;
+y_dg = 14;
+
+% =========== TRANSMITTER CHAIN (top row, left) ===========
 
 % Laser Diode
 draw_block(ax1, 5, y_tx, 18, 12, col_tx, ...
@@ -45,7 +49,7 @@ draw_block(ax1, 5, y_tx, 18, 12, col_tx, ...
      '\tau = 5 ns', 'PRF = 50 kHz', '\Delta\lambda = 3 nm'}, 'w');
 
 % Arrow
-draw_arrow(ax1, 23, y_tx, 27, y_tx, col_arrow);
+draw_arrow(ax1, 14, y_tx, 19, y_tx, col_arrow);
 
 % Collimating Lens
 draw_block(ax1, 27, y_tx, 16, 12, col_optics, ...
@@ -53,7 +57,7 @@ draw_block(ax1, 27, y_tx, 16, 12, col_optics, ...
      '\theta_{div} = 4 mrad'}, 'w');
 
 % Arrow
-draw_arrow(ax1, 43, y_tx, 47, y_tx, col_arrow);
+draw_arrow(ax1, 35, y_tx, 40, y_tx, col_arrow);
 
 % Beam Splitter
 draw_block(ax1, 47, y_tx, 14, 12, col_optics, ...
@@ -61,11 +65,11 @@ draw_block(ax1, 47, y_tx, 14, 12, col_optics, ...
      'R=((n1-n2)/', '(n1+n2))^2'}, 'w');
 
 % Arrow right → Scanner
-draw_arrow(ax1, 61, y_tx, 65, y_tx, col_arrow);
+draw_arrow(ax1, 54, y_tx, 56, y_tx, col_arrow);
 
 % Arrow down from BS → Reference detector (dashed)
-draw_dashed_arrow(ax1, 54, y_tx-6, 54, y_tx-14, [0.5 0.5 0.5]);
-text(56, y_tx-10, 'Ref', 'FontSize', 8, 'Color', [0.5 0.5 0.5]);
+draw_dashed_arrow(ax1, 47, y_tx-6, 47, y_tx-14, [0.5 0.5 0.5]);
+text(49, y_tx-10, 'Ref', 'FontSize', 8, 'Color', [0.5 0.5 0.5]);
 
 % =========== SCANNING OPTICS (top row, right) ===========
 
@@ -75,7 +79,7 @@ draw_block(ax1, 65, y_tx, 18, 12, col_mech, ...
      '10,000 RPM', '\theta_{opt} = 120°'}, 'w');
 
 % Arrow
-draw_arrow(ax1, 83, y_tx, 87, y_tx, col_arrow);
+draw_arrow(ax1, 74, y_tx, 79, y_tx, col_arrow);
 
 % F-theta Lens
 draw_block(ax1, 87, y_tx, 16, 12, col_optics, ...
@@ -83,8 +87,8 @@ draw_block(ax1, 87, y_tx, 16, 12, col_optics, ...
      'Field: 200×200 mm', 'Dist: <0.1%'}, 'w');
 
 % Arrow to target
-draw_arrow(ax1, 103, y_tx, 110, y_tx, col_arrow);
-text(106.5, y_tx+2, 'TX Beam', 'FontSize', 8, 'Color', col_arrow, ...
+draw_arrow(ax1, 95, y_tx, 107, y_tx, col_arrow);
+text(101, y_tx+2, 'TX Beam', 'FontSize', 8, 'Color', col_arrow, ...
     'HorizontalAlignment', 'center');
 
 % =========== TARGET ===========
@@ -99,12 +103,11 @@ for yy = [y_tx-8, y_tx-4, y_tx+0, y_tx+4]
 end
 
 % Return arrow (target → receiver telescope)
-draw_arrow(ax1, 115, y_tx-14, 103, y_tx-28, [0.1 0.5 0.1]);
-text(112, y_tx-22, {'Backscatter', '\eta_{atm}'}, 'FontSize', 8, ...
+draw_arrow(ax1, 107, y_tx-14, 95, y_rx, [0.1 0.5 0.1]);
+text(105, y_rx+10, {'Backscatter', '\eta_{atm}'}, 'FontSize', 8, ...
     'Color', [0.1 0.5 0.1], 'HorizontalAlignment', 'center');
 
 % =========== RECEIVER CHAIN (bottom row, right to left) ===========
-y_rx = 38;
 
 % Cassegrain Telescope
 draw_block(ax1, 87, y_rx, 16, 12, col_rx, ...
@@ -112,7 +115,7 @@ draw_block(ax1, 87, y_rx, 16, 12, col_rx, ...
      'f = 150 mm', 'FOV = 2 mrad'}, 'w');
 
 % Arrow
-draw_arrow(ax1, 87, y_rx, 83, y_rx, col_arrow);
+draw_arrow(ax1, 79, y_rx, 75, y_rx, col_arrow);
 
 % Bandpass Filter
 draw_block(ax1, 67, y_rx, 16, 12, col_rx, ...
@@ -120,7 +123,7 @@ draw_block(ax1, 67, y_rx, 16, 12, col_rx, ...
      'FWHM = 10 nm', '\pm5° angle tol.'}, 'w');
 
 % Arrow
-draw_arrow(ax1, 67, y_rx, 63, y_rx, col_arrow);
+draw_arrow(ax1, 59, y_rx, 53, y_rx, col_arrow);
 
 % APD
 draw_block(ax1, 43, y_rx, 20, 12, col_rx, ...
@@ -129,7 +132,7 @@ draw_block(ax1, 43, y_rx, 20, 12, col_rx, ...
      'I_d = 1 nA'}, 'w');
 
 % Arrow
-draw_arrow(ax1, 43, y_rx, 39, y_rx, col_arrow);
+draw_arrow(ax1, 33, y_rx, 30, y_rx, col_arrow);
 
 % TIA
 draw_block(ax1, 21, y_rx, 18, 12, col_rx, ...
@@ -138,10 +141,9 @@ draw_block(ax1, 21, y_rx, 18, 12, col_rx, ...
      't_r = 2 ns'}, 'w');
 
 % Arrow
-draw_arrow(ax1, 21, y_rx, 17, y_rx, col_arrow);
+draw_arrow(ax1, 14, y_rx-6, 14, y_dg+6, col_arrow);
 
 % =========== DIGITAL PROCESSING (bottom row, left) ===========
-y_dg = 14;
 
 % TDC
 draw_block(ax1, 5, y_dg, 18, 12, col_digital, ...
@@ -152,7 +154,7 @@ draw_block(ax1, 5, y_dg, 18, 12, col_digital, ...
 draw_arrow(ax1, 14, y_rx-6, 14, y_dg+6, col_arrow);
 
 % Arrow
-draw_arrow(ax1, 23, y_dg, 27, y_dg, col_arrow);
+draw_arrow(ax1, 14, y_dg, 17, y_dg, col_arrow);
 
 % FPGA
 draw_block(ax1, 27, y_dg, 20, 12, col_digital, ...
@@ -161,7 +163,7 @@ draw_block(ax1, 27, y_dg, 20, 12, col_digital, ...
      'Point Cloud Gen'}, 'w');
 
 % Arrow
-draw_arrow(ax1, 47, y_dg, 51, y_dg, col_arrow);
+draw_arrow(ax1, 37, y_dg, 41, y_dg, col_arrow);
 
 % ML Classifier
 draw_block(ax1, 51, y_dg, 20, 12, [0.75 0.20 0.55], ...
@@ -170,7 +172,7 @@ draw_block(ax1, 51, y_dg, 20, 12, [0.75 0.20 0.55], ...
      '50k training pts'}, 'w');
 
 % Arrow
-draw_arrow(ax1, 71, y_dg, 75, y_dg, col_arrow);
+draw_arrow(ax1, 61, y_dg, 66, y_dg, col_arrow);
 
 % Output
 draw_block(ax1, 75, y_dg, 18, 12, [0.2 0.2 0.2], ...
@@ -183,14 +185,14 @@ draw_block(ax1, 115, y_dg, 16, 12, col_mech, ...
      'Tilt: -30\circ..+90\circ', 'Res: 0.01\circ', ...
      'Speed: 60\circ/s'}, 'w');
 
-% Arrow from gimbal to scanner
-draw_dashed_arrow(ax1, 123, y_dg+6, 123, y_tx-20, col_mech);
-draw_dashed_arrow(ax1, 123, y_tx-20, 74, y_tx-6, col_mech);
+% Arrow from gimbal to scanner (feedback)
+plot(ax1, [123 123 65], [y_dg+6, y_tx-20, y_tx-20], '--', 'Color', col_mech);
+draw_dashed_arrow(ax1, 65, y_tx-20, 65, y_tx-6, col_mech);
 text(100, y_tx-18, 'Pointing Control', 'FontSize', 8, ...
     'Color', col_mech, 'FontAngle', 'italic');
 
 % Arrow from FPGA to Gimbal
-draw_dashed_arrow(ax1, 47, y_dg-2, 115, y_dg-2, col_digital);
+draw_dashed_arrow(ax1, 37, y_dg-2, 107, y_dg-2, col_digital);
 text(80, y_dg-4, 'Gimbal Commands', 'FontSize', 8, ...
     'Color', col_digital, 'FontAngle', 'italic');
 
@@ -422,14 +424,14 @@ for k = 1:size(subsystems, 1)
     x_pos = subsystems{k, 5};
     
     % Vertical line from main bus
-    plot(ax3, [60, x_pos+10], [48, 42], 'k-', 'LineWidth', 1.2);
+    plot(ax3, [60, x_pos], [48, 42], 'k-', 'LineWidth', 1.2);
     
     % Regulator block
     draw_block(ax3, x_pos, 38, 20, 6, [0.9 0.9 0.85], ...
         {'DC-DC', ['\eta = 92%']}, [0.3 0.3 0.3]);
     
     % Line to load
-    plot(ax3, [x_pos+10, x_pos+10], [35, y_sub+5], 'k-', 'LineWidth', 1.5);
+    plot(ax3, [x_pos, x_pos], [35, y_sub+4], 'k-', 'LineWidth', 1.5);
     
     % Load block
     draw_block(ax3, x_pos, y_sub, 20, 8, clr, ...

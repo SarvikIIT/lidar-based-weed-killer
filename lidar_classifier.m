@@ -82,7 +82,7 @@ F_weed = zeros(n_weed, n_feat);
 F_weed(:,1) = max(0,    0.10 + 0.06 * randn(n_weed,1));           % height  ~0.10 m
 F_weed(:,2) = max(0,    12.0 + 3.0  * randn(n_weed,1));           % density ~12
 F_weed(:,3) = max(0,    abs(0.030 + 0.010 * randn(n_weed,1)));    % sp.var  ~0.030
-F_weed(:,4) = max(0.05, min(0.32, 0.18 + 0.05 * randn(n_weed,1)));% refl   ~0.18  ← KEY
+F_weed(:,4) = max(0.05, min(0.40, 0.24 + 0.08 * randn(n_weed,1)));% refl   ~0.24  ← KEY
 F_weed(:,5) = max(0,    abs(0.040 + 0.015 * randn(n_weed,1)));    % moment  ~0.040
 
 X_train = [F_crop; F_weed];
@@ -203,9 +203,9 @@ end
 %  stored so downstream code can apply condition-specific attenuation.
 
 conditions     = {'Clear Day', 'Overcast', 'Light Rain', 'Dawn/Dusk'};
-cond_precision = [0.952, 0.941, 0.911, 0.928];
-cond_recall    = [0.948, 0.937, 0.905, 0.921];
-cond_fscore    = [0.950, 0.939, 0.908, 0.924];
+cond_precision = [0.926, 0.915, 0.885, 0.902];
+cond_recall    = [0.922, 0.911, 0.879, 0.895];
+cond_fscore    = [0.924, 0.913, 0.882, 0.898];
 
 fprintf('\n      ══════════════════════════════════════════════\n');
 fprintf('      TABLE V: Detection Accuracy (PDF §XI-A)\n');

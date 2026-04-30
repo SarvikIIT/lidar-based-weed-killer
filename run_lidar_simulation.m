@@ -57,7 +57,7 @@ gt_labels(is_weed) = 2;
 true_rho = zeros(1, N_targets);
 n_crop_t = sum(~is_weed);  n_weed_t = sum(is_weed);
 true_rho(~is_weed) = max(0.30, min(0.70, 0.50 + 0.06 * randn(1, n_crop_t)));
-true_rho( is_weed) = max(0.05, min(0.32, 0.18 + 0.05 * randn(1, n_weed_t)));
+true_rho( is_weed) = max(0.05, min(0.40, 0.24 + 0.08 * randn(1, n_weed_t)));
 
 fprintf('      Crops: %d   Weeds: %d\n', sum(~is_weed), sum(is_weed));
 

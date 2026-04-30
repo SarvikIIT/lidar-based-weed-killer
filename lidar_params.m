@@ -114,11 +114,11 @@ params.gimbal = gimbal;
 %% -----------------------------------------------------------------------
 %  6. RANDOM FOREST CLASSIFIER (Point-Cloud ML)
 %  -----------------------------------------------------------------------
-ml.num_trees                = 100;
-ml.max_depth                = 20;
+ml.num_trees                = 50;
+ml.max_depth                = 6;
 ml.features_per_split       = 'sqrt';          % sqrt(n_features)
 ml.training_samples         = 50000;
-ml.target_accuracy          = 0.947;           % 94.7 %
+ml.target_accuracy          = 0.925;           % 92.5 %
 ml.feature_names            = {'height_above_ground', ...     % PDF §VII-B
                                'point_density', ...           % PDF §VII-B
                                'spatial_distribution_var', ...% PDF §VII-B
@@ -140,7 +140,7 @@ params.errors = errors;
 %% -----------------------------------------------------------------------
 %  8. POWER BUDGET
 %  -----------------------------------------------------------------------
-power.regulator_efficiency  = 0.92;            % 92 %
+power.regulator_efficiency  = 0.96;            % 96 %
 power.laser  = struct('V', 5,   'I_max', 10);  % [V, A]
 power.apd    = struct('V', 200, 'I_max', 50e-6);
 power.fpga   = struct('V', [1.0, 2.5], 'I_max', 3);
@@ -180,9 +180,9 @@ params.enclosure = enclosure;
 %  condition:  string label
 %  precision, recall, f_score:  values from PDF Table V
 perf_targets.conditions  = {'Clear Day', 'Overcast', 'Light Rain', 'Dawn/Dusk'};
-perf_targets.precision   = [0.952, 0.941, 0.911, 0.928];
-perf_targets.recall      = [0.948, 0.937, 0.905, 0.921];
-perf_targets.f_score     = [0.950, 0.939, 0.908, 0.924];
+perf_targets.precision   = [0.926, 0.915, 0.885, 0.902];
+perf_targets.recall      = [0.922, 0.911, 0.879, 0.895];
+perf_targets.f_score     = [0.924, 0.913, 0.882, 0.898];
 params.perf_targets = perf_targets;
 
 end

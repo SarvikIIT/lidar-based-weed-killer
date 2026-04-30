@@ -1,0 +1,104 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{karim2024}
+\citation{luo2024}
+\citation{bell2016}
+\citation{zhang2022,yang2024}
+\citation{guo2024}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{3}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Materials and System Parameters}{3}{section.2}\protected@file@percent }
+\newlabel{sec:materials}{{2}{3}{Materials and System Parameters}{section.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Hardware Platform and Design Specifications}{3}{subsection.2.1}\protected@file@percent }
+\citation{luo2024}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces System design specifications.}}{4}{table.caption.1}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{tab:specs}{{1}{4}{System design specifications}{table.caption.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Simulation Environment}{4}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Synthetic Scene Configuration}{4}{subsection.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Methodology}{4}{section.3}\protected@file@percent }
+\newlabel{sec:methodology}{{3}{4}{Methodology}{section.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}System Architecture Overview}{4}{subsection.3.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces End-to-end LiDAR simulation pipeline with seven coupled subsystem modules.}}{5}{figure.caption.2}\protected@file@percent }
+\newlabel{fig:pipeline}{{1}{5}{End-to-end LiDAR simulation pipeline with seven coupled subsystem modules}{figure.caption.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Laser Transmitter (\texttt  {lidar\_transmitter.m})}{5}{subsection.3.2}\protected@file@percent }
+\newlabel{eq:pulse}{{3}{5}{Laser Transmitter (\texttt {lidar\_transmitter.m})}{equation.3.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Laser transmitter parameters.}}{5}{table.caption.3}\protected@file@percent }
+\newlabel{tab:tx}{{2}{5}{Laser transmitter parameters}{table.caption.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Optical Scanner (\texttt  {lidar\_scanner.m})}{5}{subsection.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.1}Polygon Mirror Scanner}{6}{subsubsection.3.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.2}Galvanometer Scanner}{6}{subsubsection.3.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Free-Space Channel (\texttt  {lidar\_channel.m})}{6}{subsection.3.4}\protected@file@percent }
+\newlabel{eq:lidar}{{6}{6}{Free-Space Channel (\texttt {lidar\_channel.m})}{equation.3.6}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.4.1}Normalised Reflectivity Intensity (Eq.~4, \S  VII-B)}{6}{subsubsection.3.4.1}\protected@file@percent }
+\newlabel{sec:inorm}{{3.4.1}{6}{Normalised Reflectivity Intensity (Eq.~4, \S VII-B)}{subsubsection.3.4.1}{}}
+\newlabel{eq:inorm}{{7}{6}{Normalised Reflectivity Intensity (Eq.~4, \S VII-B)}{equation.3.7}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.4.2}Maximum Range (Eq.~6, \S  XI-B)}{6}{subsubsection.3.4.2}\protected@file@percent }
+\newlabel{eq:rmax}{{8}{6}{Maximum Range (Eq.~6, \S XI-B)}{equation.3.8}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Channel and receiver parameters.}}{7}{table.caption.4}\protected@file@percent }
+\newlabel{tab:channel}{{3}{7}{Channel and receiver parameters}{table.caption.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Signal Reception (\texttt  {lidar\_receiver.m})}{7}{subsection.3.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6}Timing and Range Measurement (\texttt  {lidar\_timing.m})}{7}{subsection.3.6}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Timing subsystem parameters (Table~III of system specification).}}{8}{table.caption.5}\protected@file@percent }
+\newlabel{tab:timing}{{4}{8}{Timing subsystem parameters (Table~III of system specification)}{table.caption.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.7}Gimbal and 3-D Point Cloud (\texttt  {lidar\_gimbal.m})}{8}{subsection.3.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.8}Point-Cloud Processing Pipeline (\texttt  {lidar\_point\_cloud.m})}{8}{subsection.3.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.8.1}Stage 1 --- Statistical Outlier Removal}{8}{subsubsection.3.8.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.8.2}Stage 2 --- RANSAC Ground Plane Segmentation}{8}{subsubsection.3.8.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.8.3}Stage 3 --- Feature Extraction (\S  VII-B)}{9}{subsubsection.3.8.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Extracted point-cloud features.}}{9}{table.caption.6}\protected@file@percent }
+\newlabel{tab:features}{{5}{9}{Extracted point-cloud features}{table.caption.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.9}Random Forest Classifier (\texttt  {lidar\_classifier.m})}{9}{subsection.3.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.9.1}Synthetic Training Data}{9}{subsubsection.3.9.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.9.2}Primary Classifier: MATLAB TreeBagger}{9}{subsubsection.3.9.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.9.3}Fallback: Built-in Recursive Random Forest}{9}{subsubsection.3.9.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Bootstrap sampling.}{9}{subsubsection.3.9.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Tree construction.}{10}{subsubsection.3.9.3}\protected@file@percent }
+\newlabel{eq:gini}{{20}{10}{Tree construction}{equation.3.20}{}}
+\@writefile{toc}{\contentsline {paragraph}{Majority vote aggregation.}{10}{equation.3.20}\protected@file@percent }
+\newlabel{eq:vote}{{21}{10}{Majority vote aggregation}{equation.3.21}{}}
+\@writefile{toc}{\contentsline {paragraph}{Algorithm pseudocode.}{10}{equation.3.21}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces Built-in Random Forest for Crop--Weed Classification}}{10}{algorithm.1}\protected@file@percent }
+\newlabel{alg:rf}{{1}{10}{Built-in Random Forest for Crop--Weed Classification}{algorithm.1}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.9.4}Evaluation Metrics}{11}{subsubsection.3.9.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.10}Monte Carlo Error Analysis}{11}{subsection.3.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Results and Discussion}{11}{section.4}\protected@file@percent }
+\newlabel{sec:results}{{4}{11}{Results and Discussion}{section.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Signal Chain Performance}{11}{subsection.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Range Measurement Accuracy}{11}{subsection.4.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Range performance summary.}}{12}{table.caption.7}\protected@file@percent }
+\newlabel{tab:range}{{6}{12}{Range performance summary}{table.caption.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Point-Cloud Processing}{12}{subsection.4.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces Object-point feature characteristics in a typical simulation run.}}{12}{table.caption.8}\protected@file@percent }
+\newlabel{tab:features_dist}{{7}{12}{Object-point feature characteristics in a typical simulation run}{table.caption.8}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Debugging Journey: From 31\% to 92.5\% Accuracy}{12}{subsection.4.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces Critical bugs and their impact on classification accuracy.}}{12}{table.caption.9}\protected@file@percent }
+\newlabel{tab:bugs}{{8}{12}{Critical bugs and their impact on classification accuracy}{table.caption.9}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Classification Results}{13}{subsection.4.5}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces Random Forest classification performance.}}{13}{table.caption.10}\protected@file@percent }
+\newlabel{tab:clf}{{9}{13}{Random Forest classification performance}{table.caption.10}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.6}Environmental Robustness (Table~V, \S  XI-A)}{13}{subsection.4.6}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {10}{\ignorespaces Detection accuracy under environmental conditions (PDF Table~V, \S  XI-A).}}{13}{table.caption.11}\protected@file@percent }
+\newlabel{tab:env}{{10}{13}{Detection accuracy under environmental conditions (PDF Table~V, \S XI-A)}{table.caption.11}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.7}Power Budget}{13}{subsection.4.7}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {11}{\ignorespaces System power budget (\S  IX, Table~IV). Regulator efficiency $\eta _{reg} = 96\%$.}}{13}{table.caption.12}\protected@file@percent }
+\newlabel{tab:power}{{11}{13}{System power budget (\S IX, Table~IV). Regulator efficiency $\eta _{reg} = 96\%$}{table.caption.12}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.8}Discussion}{13}{subsection.4.8}\protected@file@percent }
+\bibcite{bell2016}{1}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Conclusions}{14}{section.5}\protected@file@percent }
+\newlabel{sec:conclusions}{{5}{14}{Conclusions}{section.5}{}}
+\bibcite{breiman2001}{2}
+\bibcite{fang2025}{3}
+\bibcite{guo2024}{4}
+\bibcite{karim2024}{5}
+\bibcite{luo2024}{6}
+\bibcite{qi2017}{7}
+\bibcite{yang2024}{8}
+\bibcite{zhang2022}{9}
+\bibcite{zhang2024review}{10}
+\@writefile{toc}{\contentsline {section}{\numberline {A}MATLAB Codebase Structure}{16}{appendix.A}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {12}{\ignorespaces MATLAB source files and their roles.}}{16}{table.caption.13}\protected@file@percent }
+\newlabel{tab:files}{{12}{16}{MATLAB source files and their roles}{table.caption.13}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {B}Key Equations Summary}{16}{appendix.B}\protected@file@percent }
+\gdef \@abspage@last{17}

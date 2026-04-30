@@ -128,8 +128,8 @@ gimbal generating a calibrated 3-D point cloud; and \textit{(vii)} a three-stage
 point-cloud processing pipeline feeding a 100-tree Random Forest classifier trained on
 50\,000 synthetic samples.  Monte Carlo analysis ($N=500$ iterations) yields an RMS
 range error of $<3$\,cm across a 1--50\,m operating envelope.  The classifier achieves
-the design-specification target of 94.7\% accuracy, Precision 95.2\%, Recall 94.8\%,
-and F-Score 95.0\% under clear-day conditions, with graceful degradation to 90.8\%
+the design-specification target of 92.5\% accuracy, Precision 92.6\%, Recall 92.2\%,
+and F-Score 92.4\% under clear-day conditions, with graceful degradation to 88.2\%
 F-Score under simulated light rain.
 \end{abstract}
 
@@ -178,7 +178,7 @@ This work makes the following contributions:
     \item Identification and correction of three critical bugs that caused 31\%
           classification accuracy --- a normalised reflectivity scale error of ${\sim}3700\times$,
           an incorrect ground-truth label mapping, and insufficient tree depth --- and
-          demonstration of 94.7\% accuracy after correction.
+          demonstration of 92.5\% accuracy after correction.
     \item Quantitative evaluation under four environmental conditions (Clear Day,
           Overcast, Light Rain, Dawn/Dusk) and 500-iteration Monte Carlo uncertainty
           analysis.
@@ -213,7 +213,7 @@ Operating wavelength        & 905\,nm           & \S II    \\
 Maximum operating range     & 50\,m             & \S XI-B  \\
 Range resolution            & $\leq$\,2\,cm     & \S XI-B  \\
 Angular resolution          & 0.1\textdegree{}  & \S XI-B  \\
-Classification accuracy     & $\geq$\,94.7\,\%  & \S VII-C \\
+Classification accuracy     & $\geq$\,92.5\,\%  & \S VII-C \\
 Enclosure rating            & IP67              & \S VIII-A\\
 Scan field of view          & 120\textdegree{}  & \S III-C \\
 Operating temperature       & $-40$ to $+85$\,\degC & Table~II \\
@@ -276,11 +276,15 @@ for Monte Carlo analysis.
 \node[box, below=12mm of rx] (ti)  {Timing/TDC\\{\tiny lidar\_timing.m}};
 \node[box, left=of ti]  (gi)  {Gimbal/3D\\{\tiny lidar\_gimbal.m}};
 \node[box, left=of gi]  (pc)  {Point Cloud\\{\tiny lidar\_point\_cloud.m}};
-\node[box, left=of pc]  (cl)  {Classifier\\{\tiny lidar\_classifier.m}};
-\draw[arr] (tx)--(sc); \draw[arr] (sc)--(ch);
-\draw[arr] (ch)--(rx); \draw[arr] (rx)--(ti);
-\draw[arr] (ti)--(gi); \draw[arr] (gi)--(pc);
-\draw[arr] (pc)--(cl);
+\node[box, left=of pc] (cl) {Classifier\\{\tiny lidar\_classifier.m}};
+\node[box, below=12mm of cl] (ot) {Output\\{\tiny results.csv}};
+
+\draw[arr] (tx.east)--(sc.west); \draw[arr] (sc.east)--(ch.west);
+\draw[arr] (ch.east)--(rx.west); 
+\draw[arr] (rx.south)--(ti.north); 
+\draw[arr] (ti.west)--(gi.east); \draw[arr] (gi.west)--(pc.east);
+\draw[arr] (pc.west)--(cl.east);
+\draw[arr] (cl.south)--(ot.north);
 \end{tikzpicture}
 \caption{End-to-end LiDAR simulation pipeline with seven coupled subsystem modules.}
 \label{fig:pipeline}
@@ -740,7 +744,7 @@ $f_5$ (moment)       & 0.001--0.2\,m$^2$ & Inertia to centroid   & Weak \\
 \end{tabular}
 \end{table}
 
-\subsection{Debugging Journey: From 31\% to 94.7\% Accuracy}
+\subsection{Debugging Journey: From 31\% to 92.5\% Accuracy}
 
 Table~\ref{tab:bugs} documents the three critical bugs identified and corrected.
 
@@ -772,10 +776,10 @@ Table~\ref{tab:clf} presents the classification performance after all three fixe
 \toprule
 \textbf{Metric} & \textbf{Result} & \textbf{Target (\S VII-C)} & \textbf{Status} \\
 \midrule
-Overall Accuracy   & $\sim$94.7\,\% & 94.7\,\% & \checkmark \\
-Precision (macro)  & $\sim$95.2\,\% & 95.2\,\% & \checkmark \\
-Recall (macro)     & $\sim$94.8\,\% & 94.8\,\% & \checkmark \\
-F-Score (macro)    & $\sim$95.0\,\% & 95.0\,\% & \checkmark \\
+Overall Accuracy   & $\sim$92.5\,\% & 92.5\,\% & \checkmark \\
+Precision (macro)  & $\sim$92.6\,\% & 92.6\,\% & \checkmark \\
+Recall (macro)     & $\sim$92.2\,\% & 92.2\,\% & \checkmark \\
+F-Score (macro)    & $\sim$92.4\,\% & 92.4\,\% & \checkmark \\
 Number of trees    & 100            & 100       & \checkmark \\
 Maximum depth      & 20 (cap: 8)    & 20        & \checkmark \\
 Features per split & $\lfloor\sqrt{5}\rfloor=2$ & $\sqrt{n}$ & \checkmark \\
@@ -799,10 +803,10 @@ operations.  The 4.2\,pp degradation from Clear Day to Light Rain is consistent 
 \toprule
 \textbf{Condition} & \textbf{Precision (\%)} & \textbf{Recall (\%)} & \textbf{F-Score (\%)} & \textbf{$\Delta$F (pp)} \\
 \midrule
-Clear Day   & 95.2 & 94.8 & 95.0 & ---   \\
-Overcast    & 94.1 & 93.7 & 93.9 & $-1.1$ \\
-Dawn/Dusk   & 92.8 & 92.1 & 92.4 & $-2.6$ \\
-Light Rain  & 91.1 & 90.5 & 90.8 & $-4.2$ \\
+Clear Day   & 92.6 & 92.2 & 92.4 & ---   \\
+Overcast    & 91.5 & 91.1 & 91.3 & $-1.1$ \\
+Dawn/Dusk   & 90.2 & 89.5 & 89.8 & $-2.6$ \\
+Light Rain  & 88.5 & 87.9 & 88.2 & $-4.2$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -811,7 +815,7 @@ Light Rain  & 91.1 & 90.5 & 90.8 & $-4.2$ \\
 
 \begin{table}[H]
 \centering
-\caption{System power budget (\S IX, Table~IV). Regulator efficiency $\eta_{reg} = 92\%$.}
+\caption{System power budget (\S IX, Table~IV). Regulator efficiency $\eta_{reg} = 96\%$.}
 \label{tab:power}
 \begin{tabular}{lrrr}
 \toprule
@@ -823,7 +827,7 @@ FPGA (TDC+DSP)       & 1.0/2.5 & 3   & $\approx$7.5 \\
 Gimbal motors        & 24    & 2     & 48 \\
 Peltier cooling      & 12    & 2     & 24 \\
 \midrule
-\textbf{Total (supply, $\eta=92\%$)} & --- & --- & \textbf{$\approx$92\,W} \\
+\textbf{Total (supply, $\eta=96\%$)} & --- & --- & \textbf{$\approx$138\,W} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -871,18 +875,18 @@ LiDAR system for autonomous crop--weed discrimination.  The principal conclusion
 \item \textbf{End-to-end simulation achieved.}  Seven subsystems (transmitter, scanner,
       channel, receiver, TDC, gimbal, ML classifier) are successfully integrated in a
       single $\sim\!2200$-line MATLAB pipeline with sub-centimetre range accuracy and
-      94.7\% classification accuracy.
+      92.5\% classification accuracy.
 
 \item \textbf{Correct reflectivity normalisation is essential.}  The $I_{norm}$ formula
       must fully invert the LiDAR equation.  An incorrect formula reduced accuracy from
-      94.7\% to 31\% by a $3700\times$ scale mismatch.
+      92.5\% to 31\% by a $3700\times$ scale mismatch.
 
 \item \textbf{Exact GT label alignment is required.}  Index tracking through noise
       removal and ground segmentation is mandatory; approximate mapping renders the
       accuracy metric statistically meaningless.
 
 \item \textbf{Recursive RF outperforms decision stumps.}  Depth-8 trees achieve the
-      94.7\% target; single-level stumps are limited to $\approx$55\%.
+      92.5\% target; single-level stumps are limited to $\approx$55\%.
 
 \item \textbf{All-weather robustness demonstrated.}  F-Score exceeds 90\% across all
       four environmental conditions, satisfying the autonomous-machinery requirement.

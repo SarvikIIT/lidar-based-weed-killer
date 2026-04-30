@@ -1,0 +1,43 @@
+\contentsline {section}{\numberline {1}Introduction}{3}{section.1}%
+\contentsline {section}{\numberline {2}Materials and System Parameters}{3}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Hardware Platform and Design Specifications}{3}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Simulation Environment}{4}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Synthetic Scene Configuration}{4}{subsection.2.3}%
+\contentsline {section}{\numberline {3}Methodology}{4}{section.3}%
+\contentsline {subsection}{\numberline {3.1}System Architecture Overview}{4}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Laser Transmitter (\texttt {lidar\_transmitter.m})}{5}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Optical Scanner (\texttt {lidar\_scanner.m})}{5}{subsection.3.3}%
+\contentsline {subsubsection}{\numberline {3.3.1}Polygon Mirror Scanner}{6}{subsubsection.3.3.1}%
+\contentsline {subsubsection}{\numberline {3.3.2}Galvanometer Scanner}{6}{subsubsection.3.3.2}%
+\contentsline {subsection}{\numberline {3.4}Free-Space Channel (\texttt {lidar\_channel.m})}{6}{subsection.3.4}%
+\contentsline {subsubsection}{\numberline {3.4.1}Normalised Reflectivity Intensity (Eq.~4, \S VII-B)}{6}{subsubsection.3.4.1}%
+\contentsline {subsubsection}{\numberline {3.4.2}Maximum Range (Eq.~6, \S XI-B)}{6}{subsubsection.3.4.2}%
+\contentsline {subsection}{\numberline {3.5}Signal Reception (\texttt {lidar\_receiver.m})}{7}{subsection.3.5}%
+\contentsline {subsection}{\numberline {3.6}Timing and Range Measurement (\texttt {lidar\_timing.m})}{7}{subsection.3.6}%
+\contentsline {subsection}{\numberline {3.7}Gimbal and 3-D Point Cloud (\texttt {lidar\_gimbal.m})}{8}{subsection.3.7}%
+\contentsline {subsection}{\numberline {3.8}Point-Cloud Processing Pipeline (\texttt {lidar\_point\_cloud.m})}{8}{subsection.3.8}%
+\contentsline {subsubsection}{\numberline {3.8.1}Stage 1 --- Statistical Outlier Removal}{8}{subsubsection.3.8.1}%
+\contentsline {subsubsection}{\numberline {3.8.2}Stage 2 --- RANSAC Ground Plane Segmentation}{8}{subsubsection.3.8.2}%
+\contentsline {subsubsection}{\numberline {3.8.3}Stage 3 --- Feature Extraction (\S VII-B)}{9}{subsubsection.3.8.3}%
+\contentsline {subsection}{\numberline {3.9}Random Forest Classifier (\texttt {lidar\_classifier.m})}{9}{subsection.3.9}%
+\contentsline {subsubsection}{\numberline {3.9.1}Synthetic Training Data}{9}{subsubsection.3.9.1}%
+\contentsline {subsubsection}{\numberline {3.9.2}Primary Classifier: MATLAB TreeBagger}{9}{subsubsection.3.9.2}%
+\contentsline {subsubsection}{\numberline {3.9.3}Fallback: Built-in Recursive Random Forest}{9}{subsubsection.3.9.3}%
+\contentsline {paragraph}{Bootstrap sampling.}{9}{subsubsection.3.9.3}%
+\contentsline {paragraph}{Tree construction.}{10}{subsubsection.3.9.3}%
+\contentsline {paragraph}{Majority vote aggregation.}{10}{equation.3.20}%
+\contentsline {paragraph}{Algorithm pseudocode.}{10}{equation.3.21}%
+\contentsline {subsubsection}{\numberline {3.9.4}Evaluation Metrics}{11}{subsubsection.3.9.4}%
+\contentsline {subsection}{\numberline {3.10}Monte Carlo Error Analysis}{11}{subsection.3.10}%
+\contentsline {section}{\numberline {4}Results and Discussion}{11}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Signal Chain Performance}{11}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Range Measurement Accuracy}{11}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Point-Cloud Processing}{12}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}Debugging Journey: From 31\% to 92.5\% Accuracy}{12}{subsection.4.4}%
+\contentsline {subsection}{\numberline {4.5}Classification Results}{13}{subsection.4.5}%
+\contentsline {subsection}{\numberline {4.6}Environmental Robustness (Table~V, \S XI-A)}{13}{subsection.4.6}%
+\contentsline {subsection}{\numberline {4.7}Power Budget}{13}{subsection.4.7}%
+\contentsline {subsection}{\numberline {4.8}Discussion}{13}{subsection.4.8}%
+\contentsline {section}{\numberline {5}Conclusions}{14}{section.5}%
+\contentsline {section}{\numberline {A}MATLAB Codebase Structure}{16}{appendix.A}%
+\contentsline {section}{\numberline {B}Key Equations Summary}{16}{appendix.B}%
